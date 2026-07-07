@@ -35,6 +35,8 @@ describe('Recommendation route', () => {
     expect(response.body.success).toBe(true);
     expect(response.body.data.recommendations).toHaveLength(1);
     expect(response.body.data.recommendations[0].score).toBe(90);
+    expect(response.body.data.recommendations[0].explanation).toBe('Strong backend match.');
+    expect(recommendationService.getTopMatches).toHaveBeenCalledWith(profile);
   });
 
   it('POST /recommend returns 400 when a required field is missing', async () => {
@@ -59,5 +61,21 @@ describe('Recommendation route', () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.body.error.message).toBe('skills must be an array');
+  });
+
+  it('POST /recommend returns an empty list when no internships match', async () => {
+    recommendationService.getTopMatches.mockResolvedValue([]);
+
+    const response = await request(app).post('/recommend').send({
+      skills: ['Rust'],
+      cgpa: 4,
+      preferredDomain: 'Blockchain',
+      preferredLocation: 'Kochi',
+      academicYear: 1,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.recommendations).toEqual([]);
   });
 });
