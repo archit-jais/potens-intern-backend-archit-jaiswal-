@@ -43,6 +43,7 @@ Current model:
 
 - `GET /api/health` - basic API health check
 - `POST /recommend` - returns top 3 internship recommendations for a student profile
+- `GET /explain/:id` - explains internship eligibility criteria in plain English
 - `GET /items` - list internship items
 - `GET /items/:id` - get one internship item
 - `POST /items` - create an internship item, requires `x-admin-token`
