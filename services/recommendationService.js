@@ -1,7 +1,11 @@
-class RecommendationService {
-  getTopMatches() {
-    throw new Error('Recommendation logic will be implemented in a later phase.');
-  }
-}
+const { Internship } = require('../models');
+const { rankInternships } = require('../utils/recommendationScoring');
 
-module.exports = new RecommendationService();
+const getTopMatches = async (profile) => {
+  const internships = await Internship.findAll();
+  return rankInternships(profile, internships, 3);
+};
+
+module.exports = {
+  getTopMatches,
+};
