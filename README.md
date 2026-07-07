@@ -27,8 +27,17 @@ npm run dev
 ```bash
 npm start
 npm run dev
+npm run seed
 npm test
 ```
+
+## Database
+
+The project uses MySQL through Sequelize. Configure database credentials in `.env`.
+
+Current model:
+
+- `Internship` - internship catalogue item used for recommendations
 
 ## Current Routes
 
