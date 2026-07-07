@@ -42,3 +42,8 @@ Current model:
 ## Current Routes
 
 - `GET /api/health` - basic API health check
+- `GET /items` - list internship items
+- `GET /items/:id` - get one internship item
+- `POST /items` - create an internship item, requires `x-admin-token`
+- `PUT /items/:id` - update an internship item, requires `x-admin-token`
+- `DELETE /items/:id` - delete an internship item, requires `x-admin-token`
