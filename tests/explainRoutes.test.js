@@ -22,6 +22,14 @@ const explanationPayload = {
     preferredLocation: 'Chennai',
     internshipType: 'Onsite',
   },
+  scoreBreakdown: {
+    skills: { maxScore: 40, rule: 'Awarded proportionally.', required: ['JavaScript', 'Node.js', 'SQL'] },
+    domain: { maxScore: 25, rule: 'Awarded when domain matches.' },
+    cgpa: { maxScore: 15, rule: 'Awarded when CGPA qualifies.' },
+    location: { maxScore: 10, rule: 'Awarded when location matches.' },
+    academicYear: { maxScore: 10, rule: 'Awarded when academic year qualifies.' },
+    total: { maxScore: 100 },
+  },
   explanation: 'This internship is best suited for backend students.',
 };
 

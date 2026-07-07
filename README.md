@@ -186,8 +186,45 @@ Successful response shape:
       {
         "internship": {},
         "score": 90,
+        "scoreBreakdown": {
+          "skills": {
+            "score": 30,
+            "maxScore": 40,
+            "matched": ["javascript", "node.js", "sql"],
+            "missing": ["rest apis"],
+            "required": ["javascript", "node.js", "sql", "rest apis"]
+          },
+          "domain": {
+            "score": 25,
+            "maxScore": 25,
+            "matched": true,
+            "expected": "Backend Development"
+          },
+          "cgpa": {
+            "score": 15,
+            "maxScore": 15,
+            "matched": true,
+            "minimumRequired": 7
+          },
+          "location": {
+            "score": 10,
+            "maxScore": 10,
+            "matched": true,
+            "expected": "Chennai"
+          },
+          "academicYear": {
+            "score": 10,
+            "maxScore": 10,
+            "matched": true,
+            "minimumRequired": 3
+          },
+          "total": {
+            "score": 90,
+            "maxScore": 100
+          }
+        },
         "matchedFields": {},
-        "explanation": "Plain English reason for the match."
+        "explanation": "Strong fit signals: 3 of 4 required skills match (javascript, node.js and sql), the domain matches Backend Development, the CGPA requirement of 7 is met, the location matches Chennai and the academic year requirement is met. Remaining gaps: missing required skills: rest apis. Final score: 90/100."
       }
     ]
   }
@@ -248,7 +285,33 @@ Response shape:
       "preferredLocation": "Chennai",
       "internshipType": "Onsite"
     },
-    "explanation": "This internship is best suited for students interested in Backend Development roles in Chennai..."
+    "scoreBreakdown": {
+      "skills": {
+        "maxScore": 40,
+        "rule": "Awarded proportionally based on how many required skills match the student profile.",
+        "required": ["JavaScript", "Node.js", "SQL"]
+      },
+      "domain": {
+        "maxScore": 25,
+        "rule": "Awarded when the preferred domain matches Backend Development."
+      },
+      "cgpa": {
+        "maxScore": 15,
+        "rule": "Awarded when the student CGPA is at least 7."
+      },
+      "location": {
+        "maxScore": 10,
+        "rule": "Awarded when the preferred location matches Chennai."
+      },
+      "academicYear": {
+        "maxScore": 10,
+        "rule": "Awarded when the student is in academic year 3 or above."
+      },
+      "total": {
+        "maxScore": 100
+      }
+    },
+    "explanation": "Best-fit signals for this role are Backend Development interest, availability for Chennai, and skills in JavaScript, Node.js and SQL..."
   }
 }
 ```
@@ -367,14 +430,9 @@ npm test
 
 ## AI Usage Log
 
-| Phase | AI Assistance Used | Human Direction |
+| Tool | Approximate Usage | Purpose |
 | --- | --- | --- |
-| Initial setup | Generated Express structure, config, middleware, and test setup | User specified stack and requested no CRUD initially |
-| Database design | Generated Sequelize Internship model and seed script | User specified internship fields and MySQL/Sequelize |
-| CRUD APIs | Generated item routes, controllers, services, and admin protection | User specified endpoint list and auth behavior |
-| Recommendation engine | Generated deterministic scoring utility, validator, service, controller, and tests | User specified profile fields and scoring weights |
-| Explain endpoint | Generated eligibility explanation route, service, utility, and tests | User specified response contents |
-| Tests | Expanded Jest/Supertest tests for required cases | User specified scenarios to cover |
-| README | Generated professional project documentation | User specified README sections |
+| ChatGPT | ~45 messages | Project planning, architecture discussion, debugging, code review, documentation, and interview preparation |
+| GitHub Copilot | Frequent inline completions | CRUD routes, controllers, React components, boilerplate, and tests |
+| Codex | ~12 prompts | Frontend generation, refactoring, README improvements, and test enhancements |
 
-No AI is used at runtime by the API. All recommendation results are produced by deterministic JavaScript logic.

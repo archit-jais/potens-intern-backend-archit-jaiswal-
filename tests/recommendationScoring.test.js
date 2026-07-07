@@ -70,9 +70,49 @@ describe('recommendation scoring', () => {
     expect(recommendations).toHaveLength(3);
     expect(recommendations[0].internship.id).toBe(1);
     expect(recommendations[0].score).toBe(90);
+    expect(recommendations[0].scoreBreakdown).toEqual({
+      skills: {
+        score: 30,
+        maxScore: 40,
+        matched: ['javascript', 'node.js', 'sql'],
+        missing: ['rest apis'],
+        required: ['javascript', 'node.js', 'sql', 'rest apis'],
+      },
+      domain: {
+        score: 25,
+        maxScore: 25,
+        matched: true,
+        expected: 'Backend Development',
+      },
+      cgpa: {
+        score: 15,
+        maxScore: 15,
+        matched: true,
+        minimumRequired: 7,
+      },
+      location: {
+        score: 10,
+        maxScore: 10,
+        matched: true,
+        expected: 'Chennai',
+      },
+      academicYear: {
+        score: 10,
+        maxScore: 10,
+        matched: true,
+        minimumRequired: 3,
+      },
+      total: {
+        score: 90,
+        maxScore: 100,
+      },
+    });
     expect(recommendations[0].matchedFields.domain).toBe(true);
     expect(recommendations[0].matchedFields.skills.matched).toEqual(['javascript', 'node.js', 'sql']);
-    expect(recommendations[0].explanation).toContain('It matches 3 of 4 required skills');
+    expect(recommendations[0].explanation).toContain('Strong fit signals');
+    expect(recommendations[0].explanation).toContain('3 of 4 required skills match');
+    expect(recommendations[0].explanation).toContain('missing required skills: rest apis');
+    expect(recommendations[0].explanation).toContain('Final score: 90/100');
   });
 
   it('returns an empty list when no internship scores above zero', () => {

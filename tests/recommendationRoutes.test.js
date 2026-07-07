@@ -24,8 +24,12 @@ describe('Recommendation route', () => {
       {
         internship: { id: 1, title: 'Backend Engineering Intern' },
         score: 90,
+        scoreBreakdown: {
+          skills: { score: 30, maxScore: 40 },
+          total: { score: 90, maxScore: 100 },
+        },
         matchedFields: { domain: true },
-        explanation: 'Strong backend match.',
+        explanation: 'Strong fit signals: the domain matches Backend Development. Final score: 90/100.',
       },
     ]);
 
@@ -35,7 +39,8 @@ describe('Recommendation route', () => {
     expect(response.body.success).toBe(true);
     expect(response.body.data.recommendations).toHaveLength(1);
     expect(response.body.data.recommendations[0].score).toBe(90);
-    expect(response.body.data.recommendations[0].explanation).toBe('Strong backend match.');
+    expect(response.body.data.recommendations[0].scoreBreakdown.total).toEqual({ score: 90, maxScore: 100 });
+    expect(response.body.data.recommendations[0].explanation).toContain('Strong fit signals');
     expect(recommendationService.getTopMatches).toHaveBeenCalledWith(profile);
   });
 

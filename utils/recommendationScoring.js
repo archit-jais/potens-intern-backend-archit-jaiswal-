@@ -29,6 +29,18 @@ const normalizeList = (values) => {
 
 const roundScore = (score) => Math.round(score * 100) / 100;
 
+const formatList = (values) => {
+  if (!values || values.length === 0) {
+    return '';
+  }
+
+  if (values.length === 1) {
+    return values[0];
+  }
+
+  return `${values.slice(0, -1).join(', ')} and ${values[values.length - 1]}`;
+};
+
 const calculateSkillMatch = (profileSkills, requiredSkills) => {
   const normalizedProfileSkills = new Set(normalizeList(profileSkills));
   const normalizedRequiredSkills = normalizeList(requiredSkills);
@@ -46,32 +58,94 @@ const calculateSkillMatch = (profileSkills, requiredSkills) => {
     score: roundScore((matchedSkills.length / normalizedRequiredSkills.length) * WEIGHTS.skills),
     matchedSkills,
     requiredSkills: normalizedRequiredSkills,
+    missingSkills: normalizedRequiredSkills.filter((skill) => !normalizedProfileSkills.has(skill)),
   };
 };
 
-const buildExplanation = (item, matchedFields) => {
-  const skillSummary =
-    matchedFields.skills.matched.length > 0
-      ? `It matches ${matchedFields.skills.matched.length} of ${matchedFields.skills.required.length} required skills: ${matchedFields.skills.matched.join(', ')}`
-      : `It does not match the listed required skills`;
+const buildScoreBreakdown = (item, matchedFields) => ({
+  skills: {
+    score: matchedFields.skills.score,
+    maxScore: WEIGHTS.skills,
+    matched: matchedFields.skills.matched,
+    missing: matchedFields.skills.missing,
+    required: matchedFields.skills.required,
+  },
+  domain: {
+    score: matchedFields.domain ? WEIGHTS.domain : 0,
+    maxScore: WEIGHTS.domain,
+    matched: matchedFields.domain,
+    expected: item.domain,
+  },
+  cgpa: {
+    score: matchedFields.cgpa ? WEIGHTS.cgpa : 0,
+    maxScore: WEIGHTS.cgpa,
+    matched: matchedFields.cgpa,
+    minimumRequired: Number(item.minimumCGPA),
+  },
+  location: {
+    score: matchedFields.location ? WEIGHTS.location : 0,
+    maxScore: WEIGHTS.location,
+    matched: matchedFields.location,
+    expected: item.location,
+  },
+  academicYear: {
+    score: matchedFields.academicYear ? WEIGHTS.academicYear : 0,
+    maxScore: WEIGHTS.academicYear,
+    matched: matchedFields.academicYear,
+    minimumRequired: Number(item.academicYear),
+  },
+});
 
-  const domainSummary = matchedFields.domain
-    ? `the preferred domain matches ${item.domain}`
-    : `the domain is ${item.domain}, which is different from the preference`;
+const buildExplanation = (item, matchedFields, scoreBreakdown) => {
+  const positives = [];
+  const gaps = [];
 
-  const cgpaSummary = matchedFields.cgpa
-    ? `the candidate meets the minimum CGPA of ${Number(item.minimumCGPA)}`
-    : `the candidate does not meet the minimum CGPA of ${Number(item.minimumCGPA)}`;
+  if (matchedFields.skills.matched.length > 0) {
+    positives.push(
+      `${matchedFields.skills.matched.length} of ${matchedFields.skills.required.length} required skills match (${formatList(
+        matchedFields.skills.matched
+      )})`
+    );
 
-  const locationSummary = matchedFields.location
-    ? `the preferred location matches ${item.location}`
-    : `the location is ${item.location}, which is different from the preference`;
+    if (matchedFields.skills.missing.length > 0) {
+      gaps.push(`missing required skills: ${formatList(matchedFields.skills.missing)}`);
+    }
+  } else {
+    gaps.push('the required skills do not overlap with the profile');
+  }
 
-  const yearSummary = matchedFields.academicYear
-    ? `the candidate's academic year meets the minimum year requirement`
-    : `the candidate's academic year is below the requirement`;
+  if (matchedFields.domain) {
+    positives.push(`the domain matches ${item.domain}`);
+  } else {
+    gaps.push(`the role domain is ${item.domain}`);
+  }
 
-  return `${skillSummary}. Also, ${domainSummary}, ${cgpaSummary}, ${locationSummary}, and ${yearSummary}.`;
+  if (matchedFields.cgpa) {
+    positives.push(`the CGPA requirement of ${Number(item.minimumCGPA)} is met`);
+  } else {
+    gaps.push(`the minimum CGPA is ${Number(item.minimumCGPA)}`);
+  }
+
+  if (matchedFields.location) {
+    positives.push(`the location matches ${item.location}`);
+  } else {
+    gaps.push(`the location is ${item.location}`);
+  }
+
+  if (matchedFields.academicYear) {
+    positives.push(`the academic year requirement is met`);
+  } else {
+    gaps.push(`the role requires academic year ${Number(item.academicYear)} or above`);
+  }
+
+  const positiveSentence =
+    positives.length > 0
+      ? `Strong fit signals: ${formatList(positives)}.`
+      : 'This role has limited alignment with the submitted profile.';
+
+  const gapSentence = gaps.length > 0 ? `Remaining gaps: ${formatList(gaps)}.` : 'There are no major eligibility gaps.';
+
+  return `${positiveSentence} ${gapSentence} Final score: ${scoreBreakdown.total.score}/${scoreBreakdown.total.maxScore}.`;
 };
 
 const scoreInternship = (profile, internship) => {
@@ -93,6 +167,7 @@ const scoreInternship = (profile, internship) => {
   const matchedFields = {
     skills: {
       matched: skillMatch.matchedSkills,
+      missing: skillMatch.missingSkills || [],
       required: skillMatch.requiredSkills,
       score: skillMatch.score,
     },
@@ -102,11 +177,20 @@ const scoreInternship = (profile, internship) => {
     academicYear: academicYearMatched,
   };
 
+  const scoreBreakdown = {
+    ...buildScoreBreakdown(item, matchedFields),
+    total: {
+      score,
+      maxScore: 100,
+    },
+  };
+
   return {
     internship: item,
     score,
+    scoreBreakdown,
     matchedFields,
-    explanation: buildExplanation(item, matchedFields),
+    explanation: buildExplanation(item, matchedFields, scoreBreakdown),
   };
 };
 

@@ -1,5 +1,9 @@
 const itemService = require('./itemService');
-const { buildEligibilityCriteria, buildEligibilityExplanation } = require('../utils/eligibilityExplanation');
+const {
+  buildEligibilityCriteria,
+  buildEligibilityExplanation,
+  buildScoreBreakdown,
+} = require('../utils/eligibilityExplanation');
 
 const explainItem = async (id) => {
   const internship = await itemService.getItemById(id);
@@ -13,6 +17,7 @@ const explainItem = async (id) => {
   return {
     internship: item,
     eligibilityCriteria: buildEligibilityCriteria(item),
+    scoreBreakdown: buildScoreBreakdown(item),
     explanation: buildEligibilityExplanation(item),
   };
 };
